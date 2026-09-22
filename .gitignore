@@ -1,0 +1,30 @@
+# Raw and generated data
+data/raw/
+data/processed/
+
+# Generated analysis reports
+reports/
+outputs/
+Fig/
+figures/
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+
+# IDE / OS
+.DS_Store
+._*
+.vscode/
+.idea/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak

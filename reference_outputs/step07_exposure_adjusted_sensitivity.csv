@@ -1,0 +1,4 @@
+analysis,method,N,rho,bootstrap_CI_low,bootstrap_CI_high,bootstrap_resamples,role
+Locomotor FoG burden vs locomotor exposure duration,Spearman,22,0.5035893796484491,0.0407053281338472,0.8211283567992437,10000,additional exposure-adjusted sensitivity
+Locomotor FoG burden vs FoG-Q controlling for locomotor exposure,Partial Spearman,22,0.5780418926757342,0.2250075450096395,0.7844814905572387,10000,additional exposure-adjusted sensitivity
+Locomotor FoG burden vs MDS-UPDRS III controlling for locomotor exposure,Partial Spearman,22,0.7158386290880696,0.331269184468465,0.8732697097708209,10000,additional exposure-adjusted sensitivity

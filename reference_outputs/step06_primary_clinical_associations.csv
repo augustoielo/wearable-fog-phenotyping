@@ -1,0 +1,4 @@
+Digital biomarker,Clinical variable,Population,N,Spearman rho,95% bootstrap CI
+locomotor_fog_burden_pct,fog_q,all,22,0.536,"[0.136, 0.791]"
+locomotor_fog_burden_pct,updrs_iii,all,22,0.785,"[0.567, 0.896]"
+akinetic_fraction_of_fog_pct,fog_q,observed_fog,16,-0.206,"[-0.749, 0.365]"

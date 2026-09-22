@@ -1,0 +1,322 @@
+{
+  "project": {
+    "title": "Wearable inertial phenotyping of freezing of gait in Parkinson's disease",
+    "python": "3.12",
+    "data_source": {
+      "name": "FoG-STAR",
+      "doi": "10.5281/zenodo.17838806",
+      "expected_local_files": [
+        "data/raw/sensor_data.csv",
+        "data/raw/clinical_data.csv"
+      ]
+    }
+  },
+  "signal_input": {
+    "sensor": "right ankle",
+    "channels": [
+      "ankleR_acc_x",
+      "ankleR_acc_y",
+      "ankleR_acc_z",
+      "ankleR_gyro_x",
+      "ankleR_gyro_y",
+      "ankleR_gyro_z"
+    ],
+    "sampling_rate_hz": 60.0,
+    "window_seconds": 1.0,
+    "window_samples": 60,
+    "locomotor_activity_codes": [
+      1,
+      6,
+      7
+    ]
+  },
+  "stages": {
+    "Stage 1": {
+      "eligible": "walking, right turn, left turn",
+      "class_0": "locomotor non-FoG",
+      "class_1": "locomotor FoG",
+      "windows": 3542,
+      "participants": 22,
+      "class_0_windows": 2556,
+      "class_1_windows": 986
+    },
+    "Stage 2": {
+      "eligible": "all ground-truth FoG contexts",
+      "class_0": "kinetic FoG (shuffling + trembling)",
+      "class_1": "akinetic FoG",
+      "windows": 1004,
+      "participants": 16,
+      "class_0_windows": 290,
+      "class_1_windows": 714
+    },
+    "Stage 3": {
+      "eligible": "ground-truth kinetic FoG",
+      "class_0": "shuffling",
+      "class_1": "trembling",
+      "windows": 290,
+      "participants": 15,
+      "class_0_windows": 83,
+      "class_1_windows": 207
+    }
+  },
+  "splits": {
+    "reference_window_seed": 20260907,
+    "outer_test_folds": {
+      "1": [
+        5,
+        7,
+        12,
+        15,
+        16
+      ],
+      "2": [
+        1,
+        8,
+        13,
+        17,
+        22
+      ],
+      "3": [
+        4,
+        6,
+        19,
+        20
+      ],
+      "4": [
+        3,
+        9,
+        11,
+        14
+      ],
+      "5": [
+        2,
+        10,
+        18,
+        21
+      ]
+    },
+    "inner_validation_subjects": {
+      "1": [
+        3,
+        9,
+        10,
+        19
+      ],
+      "2": [
+        9,
+        10,
+        11,
+        19
+      ],
+      "3": [
+        1,
+        9,
+        10,
+        15
+      ],
+      "4": [
+        7,
+        12,
+        13,
+        19
+      ],
+      "5": [
+        4,
+        7,
+        13,
+        19
+      ]
+    }
+  },
+  "interpretable_features": {
+    "all": [
+      "acc_mag_std",
+      "acc_jerk_vector_rms",
+      "gyro_mag_std",
+      "gyro_angacc_vector_rms",
+      "acc_rel_power_3_8",
+      "acc_freeze_index_log10",
+      "acc_spectral_entropy",
+      "gyro_rel_power_3_8",
+      "gyro_spectral_entropy"
+    ],
+    "temporal": [
+      "acc_mag_std",
+      "acc_jerk_vector_rms",
+      "gyro_mag_std",
+      "gyro_angacc_vector_rms"
+    ],
+    "spectral": [
+      "acc_rel_power_3_8",
+      "acc_freeze_index_log10",
+      "acc_spectral_entropy",
+      "gyro_rel_power_3_8",
+      "gyro_spectral_entropy"
+    ]
+  },
+  "traditional_ml": {
+    "primary_metric": "balanced_accuracy",
+    "logistic_regression": {
+      "penalty": "L2",
+      "solver": "liblinear",
+      "C_grid": [
+        0.01,
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ],
+      "threshold": 0.5
+    },
+    "rbf_svm": {
+      "C_grid": [
+        0.1,
+        1.0,
+        10.0,
+        100.0
+      ],
+      "gamma_grid": [
+        "scale",
+        0.01,
+        0.1,
+        1.0
+      ]
+    },
+    "random_forest": {
+      "n_estimators": 500,
+      "criterion": "gini",
+      "bootstrap": true,
+      "random_state": 20260909,
+      "max_depth": [
+        6,
+        12,
+        null
+      ],
+      "min_samples_leaf": [
+        5,
+        1
+      ],
+      "max_features": [
+        "sqrt",
+        1.0
+      ]
+    },
+    "selection_rule": [
+      "highest inner-validation balanced accuracy",
+      "highest inner-validation macro-F1",
+      "fixed candidate order"
+    ],
+    "test_distribution": "natural"
+  },
+  "cnn": {
+    "architecture": [
+      "Conv1d(6,32,kernel_size=5,padding=2)",
+      "ReLU",
+      "Conv1d(32,64,kernel_size=5,padding=2)",
+      "ReLU",
+      "AdaptiveAvgPool1d(1)",
+      "Dropout(0.2)",
+      "Linear(64,1)"
+    ],
+    "trainable_parameters": 11361,
+    "optimizer": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "loss": "BCEWithLogitsLoss",
+    "batch_size": 64,
+    "samples_per_epoch": 1024,
+    "max_epochs": 40,
+    "early_stopping_patience": 7,
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "normalization": "subject-balanced channel statistics from inner-training blocks only",
+    "sampling": "leaf -> subject -> complete block weighted by valid starts -> random valid start",
+    "ensemble": "mean outer-test probability across five seed-specific models within each fold",
+    "threshold": 0.5
+  },
+  "mixed_subject_nested_loso": {
+    "Stage 2_subjects": [
+      1,
+      2,
+      3,
+      9,
+      11,
+      12,
+      19,
+      21
+    ],
+    "Stage 3_subjects": [
+      9,
+      12,
+      13,
+      20,
+      21
+    ],
+    "model": "L2 Logistic Regression",
+    "C_grid": [
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0
+    ],
+    "feature_sets": [
+      "temporal",
+      "spectral",
+      "combined"
+    ],
+    "inner_selection": "subject-equal mean balanced accuracy; macro-F1 tie-break; smaller C final tie-break"
+  },
+  "clinical_analysis": {
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 20260909,
+    "bootstrap_unit": "participant",
+    "primary_associations": [
+      "locomotor FoG burden vs FoG-Q",
+      "locomotor FoG burden vs MDS-UPDRS III",
+      "akinetic fraction of observed FoG vs FoG-Q"
+    ],
+    "p_values": false
+  },
+  "exposure_adjusted_sensitivity": {
+    "N": 22,
+    "exposure": "locomotor_observation_minutes",
+    "partial_spearman": "average-rank transform; OLS residualization with intercept on ranked exposure; Pearson correlation of residuals",
+    "bootstrap_resamples": 10000,
+    "base_seed": 20260909,
+    "seed_offsets": {
+      "burden_vs_exposure": 50000,
+      "partial_fogq": 51009,
+      "partial_updrs_iii": 52018
+    }
+  },
+  "activity_context_sensitivity": {
+    "stage": "Stage 1",
+    "activities": {
+      "1": "walking",
+      "6": "right_turn",
+      "7": "left_turn"
+    },
+    "uses_frozen_outer_test_predictions": true,
+    "model_retraining": false,
+    "retuning": false,
+    "threshold_retuning": false,
+    "activity_used_as_model_input": false
+  },
+  "pipeline_steps": [
+    "01_segments_windows_splits",
+    "02_biomechanical_features",
+    "03_traditional_ml_benchmark",
+    "04_raw_temporal_cnn_benchmark",
+    "05_mixed_subject_nested_loso",
+    "06_clinical_digital_phenotype",
+    "07_exposure_adjusted_sensitivity",
+    "08_stage1_activity_context_sensitivity",
+    "09_participant_window_counts"
+  ]
+}
